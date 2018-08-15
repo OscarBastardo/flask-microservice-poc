@@ -1,8 +1,17 @@
 version: '3'
 services:
-  web:
-    build: .
-    ports:
-     - "5000:5000"
   redis:
-    image: "redis:alpine"
+    image: 'redis:alpine'
+    command: 'redis-server --appendonly yes'
+    ports:
+      - '6379:6379'
+  flask:
+    build: .
+    command: 'python app.py'
+    volumes:
+      - .:/code
+    ports:
+      - '5000:5000'
+  celery:
+    build: .
+    command: 'celery -A app.celery worker --loglevel=info'

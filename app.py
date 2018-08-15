@@ -1,7 +1,9 @@
-from flask import Flask, request, render_template, session, flash, redirect, url_for, jsonify
+from flask import Flask, request, make_response, session, flash, redirect, url_for, jsonify, Response
 from celery import Celery
 from factories import TransactionFactory
 from json import dumps
+import csv
+from helpers import export_json_to_csv
 
 app = Flask(__name__)
 
@@ -31,6 +33,11 @@ celery = make_celery(app)
 def add_together(a, b):
     return a + b
 
+# Task to queue  generation export
+@celery.task()
+def store_report_pdf(a, b):
+    return a + b
+
 # API Routes
 @app.route('/')
 def root():
@@ -49,6 +56,13 @@ def transactions():
     file = open('storage/transactions.json', 'r') 
     transactions_json = file.read().replace('\"', '')
     return jsonify(transactions_json)
+
+@app.route('/transactions/csv')
+def transactions_csv():
+    csv_path = 'storage/reports/export.csv'    
+    with open(csv_path, 'rb') as csv_file:
+        transactions_csv = csv_file.read()
+        return Response(transactions_csv, mimetype='text/csv')
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

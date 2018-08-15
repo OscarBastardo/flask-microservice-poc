@@ -8,6 +8,7 @@ services:
   flask:
     build: .
     command: 'python app.py'
+    restart: always
     volumes:
       - .:/code
     ports:

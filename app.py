@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, session, flash, redirect, url_for, jsonify
 from celery import Celery
 from factories import TransactionFactory
+from json import dumps
 
 app = Flask(__name__)
 
@@ -42,7 +43,12 @@ def mock_transactions():
     factory = TransactionFactory()
     factory.get_mock_transactions()
     return "<h1> Transactions have been mocked </h1>"
-    
 
+@app.route('/transactions')
+def transactions():
+    file = open('storage/transactions.json', 'r') 
+    transactions_json = file.read().replace('\"', '')
+    return jsonify(transactions_json)
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
